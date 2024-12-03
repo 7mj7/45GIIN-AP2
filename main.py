@@ -1,35 +1,29 @@
 # main.py
 
 # Importaciones necesarias
-from fastapi import FastAPI, Depends  # FastAPI para crear la API, Depends para inyección de dependencias
-from fastapi.security import OAuth2PasswordRequestForm  # Formulario estándar OAuth2 para login
-from typing import Annotated  # Para mejorar las anotaciones de tipo
-from controllers.auth_controller import login_user, get_current_user  # Funciones de autenticación
-from models.user import User, Token  # Modelos Pydantic
+from fastapi import FastAPI
+from api.v1 import endpoints as v1_endpoints
+# from api.v2 import endpoints as v2_endpoints  # Si alguna vez tenemos v2
+
 
 # Inicialización de la aplicación FastAPI
 app = FastAPI(title="API Simple con Autenticación")
 
-# Endpoint para login
-@app.post("/token", response_model=Token)
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    """
-    Endpoint para autenticación de usuarios
-    - Ruta: /token
-    - Método: POST
-    - Espera: formulario con username y password
-    - Retorna: Token JWT
-    """
-    return await login_user(form_data)
+# Registro del router de autenticación
+app.include_router(
+    v1_endpoints.router,
+     prefix="/api/v1",      # Añadimos el prefijo aquí
+    # tags=["v1"]           # El tag lo añadimos en v1/endpoints.py
+)
 
-# Endpoint protegido que requiere autenticación
-@app.get("/users/me", response_model=User)
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
-    """
-    Endpoint protegido que muestra información del usuario actual
-    - Ruta: /users/me
-    - Método: GET
-    - Requiere: Token JWT válido en header Authorization
-    - Retorna: Datos del usuario autenticado
-    """
-    return current_user
+# Versión 2 (cuando la tengamos)
+# app.include_router(
+#     v2_endpoints.router,
+#     prefix="/api/v2",
+#     tags=["v2"]
+# )
+
+# Ruta raíz de la API
+@app.get("/")
+async def root():
+    return {"message": "Bienvenido a mi API"}
