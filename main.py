@@ -27,3 +27,8 @@ app.include_router(
 @app.get("/")
 async def root():
     return {"message": "Bienvenido a mi API"}
+
+# Prueba
+@app.get("/products/{product_id}")
+async def get_product(product_id: int,query: str = None):
+    return {"product_id": product_id}
